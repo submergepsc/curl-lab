@@ -1,0 +1,2 @@
+# Keep internal files out of static-asset uploads
+*.map

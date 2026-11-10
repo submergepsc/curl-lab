@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Cloudflare Worker curl 实验室：在自己的域名上学习 HTTP、API、认证、Cookie、文件、代理、网络调试。">
+  <title>CURL LAB — 自托管 curl 全功能实验室</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="回到顶部"><span class="brand-symbol">&gt;_</span><span>CURL<span class="brand-accent">/</span>LAB</span></a>
+      <nav class="header-nav" aria-label="导航"><a href="#labs">实验项目</a><a href="#terminal">请求检查器</a><a href="#environment">部署与网络</a></nav>
+      <span class="header-pill"><span class="pulse-dot"></span> CLOUDFLARE WORKER</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="eyebrow"><span class="line"></span> NETWORK ENGINEERING PLAYGROUND / 2026</div>
+      <div class="hero-layout">
+        <div>
+          <h1>让每一条 <span class="word-glow">curl</span><br>命令都有回响<span class="cursor">_</span></h1>
+          <p class="hero-copy">一套部署在你自己 Cloudflare 域名上的网络实验室。发送真实请求，观察状态码、请求头、JSON、身份认证、Cookie、文件传输与延迟行为。从 GET 入门，到完整理解 HTTP。</p>
+          <div class="hero-buttons"><a class="btn btn-primary" href="#labs">开始实验 <span aria-hidden="true">↗</span></a><a class="btn btn-outline" href="#environment">查看部署边界</a></div>
+        </div>
+        <div class="hero-console" aria-label="命令示意">
+          <div class="console-title"><span class="lights"><i></i><i></i><i></i></span> curl — quick preview <span class="status-light">● live</span></div>
+          <div class="console-body"><div class="comment"># 你的域名，Cloudflare 边缘实验环境</div><div><span class="prompt">$</span> curl -i <span class="console-url" id="preview-url">https://your-domain.example/api/get</span></div><div class="console-space"></div><div class="header-green">HTTP/2 200 OK</div><div class="muted">Content-Type: application/json</div><div class="muted">X-Lab-Request-ID: 8a3f12c9</div><div class="console-space"></div><div>{</div><div>  <span class="json-key">"method"</span>: <span class="json-val">"GET"</span>,</div><div>  <span class="json-key">"message"</span>: <span class="json-val">"GET 请求成功"</span></div><div>}</div></div>
+        </div>
+      </div>
+      <div class="metrics" id="metrics"><div><strong id="metric-labs">—</strong><span>项实验命令</span></div><div><strong>7</strong><span>大知识模块</span></div><div><strong>0</strong><span>必需的 npm 依赖</span></div><div><strong>2 MiB</strong><span>最大上传体积</span></div></div>
+    </section>
+
+    <section class="workspace wrap" id="labs">
+      <div class="section-intro"><div><div class="eyebrow">01 / EXPERIMENTS</div><h2>实验工作台</h2><p>选一个模块，复制 curl 命令到终端运行。也可以点击「浏览器试运行」查看真实响应。浏览器运行不等于运行了 curl。</p></div><div class="progress-card"><div class="progress-caption"><span>我的完成进度</span><strong id="progress-text">0 / 0</strong></div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><button class="tiny-link" id="reset-progress">重置标记</button></div></div>
+      <div class="tool-row">
+        <div class="tool-group"><label for="shell-select">终端环境</label><select id="shell-select"><option value="bash">Linux / Bash</option><option value="pwsh">Windows / PowerShell</option></select></div>
+        <div class="tool-group base-group"><label for="base-url">实验网站地址</label><input id="base-url" readonly aria-label="当前站点地址"><button class="icon-button" id="copy-base" title="复制网站地址">复制</button></div>
+      </div>
+      <div class="module-tabs" id="module-tabs" role="tablist" aria-label="实验模块"></div>
+      <div id="module-content" class="module-content"></div>
+    </section>
+
+    <section class="inspector-section" id="terminal">
+      <div class="wrap inspector-layout">
+        <div class="inspector-description"><div class="eyebrow">02 / RESPONSE INSPECTOR</div><h2>请求检查器</h2><p>不必离开网页，也可以快速查看实验接口的响应。点击任一实验的「浏览器试运行」，结果会出现在右侧（移动端显示在下方）。</p>
+          <div class="note"><span class="note-icon">i</span><span>浏览器基于 <code>fetch()</code> 发送请求。要练习 <code>-v</code>、代理、DNS、TLS、HTTP 版本和连接超时，仍然需要在终端使用 curl。</span></div>
+          <button class="btn btn-outline inspector-start" id="run-health">测试服务器健康状态</button>
+        </div>
+        <div class="inspector-console">
+          <div class="console-title"><span class="lights"><i></i><i></i><i></i></span> response inspector <span id="inspector-badge" class="small-badge">READY</span></div>
+          <div class="inspector-top"><div id="inspector-method">GET</div><code id="inspector-path">/api/health</code><span id="inspector-code">—</span></div>
+          <div class="inspector-tabs"><button class="active" data-panel="body">响应体</button><button data-panel="headers">响应头</button></div>
+          <pre id="inspector-body" class="inspect-output">点击任意实验中的「浏览器试运行」或左侧健康检查按钮。</pre>
+          <pre id="inspector-headers" class="inspect-output hidden"></pre>
+          <div class="inspector-bottom"><span id="inspector-time">时间 —</span><span id="inspector-size">大小 —</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="environment wrap" id="environment">
+      <div class="eyebrow">03 / INFRASTRUCTURE</div><h2>哪些测试需要服务器配置？</h2><p class="section-lead">HTTP 接口可以直接由本项目提供，但 HTTPS、HTTP/2、HTTP/3、DNS 和代理并不是 HTML 页面能够独立实现的。</p>
+      <div class="infra-grid">
+        <article><div class="infra-icon">01</div><h3>立即可用</h3><p>GET / POST / PUT / PATCH / DELETE、请求头、状态码、重定向、Basic/Bearer、Cookie、文件与 Range、延迟、gzip、ETag。</p><span class="infra-tag">Cloudflare Worker 实现</span></article>
+        <article><div class="infra-icon">02</div><h3>部署后可测试</h3><p>真实域名、DNS、Cloudflare HTTPS 证书、IPv4/IPv6、连接耗时，以及经 Cloudflare 边缘协商的 HTTP/2。</p><span class="infra-tag">由 Cloudflare 边缘提供</span></article>
+        <article><div class="infra-icon">03</div><h3>取决于外部环境</h3><p>HTTP/3 需 Cloudflare 配置与客户端同时支持；SOCKS5 / HTTP 代理要另行准备；实际 IP 随客户端网络及代理而变。</p><span class="infra-tag">需要额外基础设施</span></article>
+      </div>
+      <div class="safety"><span class="safety-icon">!</span><div><strong>安全边界</strong><p>这是教学诊断服务，不是生产 API。演示账号和 Token 是公开的；禁止填写真实密码、真实 Cookie 或生产 Token。公网开放时可结合 Cloudflare WAF、Rate Limiting 或 Access 加以保护；Access 可能影响 curl 认证实验。接口不执行命令、不保存上传文件，延时和上传大小也有限制。</p></div></div>
+    </section>
+  </main>
+  <footer><div class="wrap footer-inner"><div class="brand footer-brand"><span class="brand-symbol">&gt;_</span><span>CURL<span class="brand-accent">/</span>LAB</span></div><p>Learn the protocol. Observe the response. Own the environment.</p><span>Built for learning · No third-party frontend libraries</span></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
